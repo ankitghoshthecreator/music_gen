@@ -1,0 +1,67 @@
+# =========================
+# Global Audio Settings
+# =========================
+
+[audio]
+sample_rate = 16000
+mono = true
+normalize = true
+
+
+# =========================
+# STFT Parameters
+# =========================
+
+[stft]
+window_size = 1024
+hop_length = 256
+window_type = "hann"
+
+
+# =========================
+# Noise Reduction
+# =========================
+
+[noise_reduction]
+noise_floor_db = -40.0
+min_preserve_harmonic_hz = 80.0
+max_preserve_harmonic_hz = 3500.0
+
+
+# =========================
+# Voice Activity Detection
+# =========================
+
+[vad]
+energy_threshold = 0.02
+min_speech_duration_sec = 0.15
+
+
+# =========================
+# Pitch Analysis
+# =========================
+
+[pitch]
+fmin_hz = 80.0
+fmax_hz = 400.0
+voicing_threshold = 0.3
+
+
+# =========================
+# Paths
+# =========================
+
+[paths]
+input_dir = "data/input"
+intermediate_dir = "data/tmp"
+output_dir = "data/output"
+
+
+# =========================
+# Mixing
+# =========================
+
+[mix]
+vocal_gain = 1.0
+bgm_gain = 0.6
+headroom_db = -1.0

@@ -1,0 +1,30 @@
+# Environments
+.venv/
+env/
+venv/
+ENV/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Data and Models
+data/weights/
+data/checkpoints/
+data/output/
+data/tmp/
+data/inp/
+*.pth
+*.pt
+*.ckpt
+
+# OS Files
+.DS_Store
+Thumbs.db
