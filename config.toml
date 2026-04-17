@@ -56,6 +56,18 @@ input_dir = "data/input"
 intermediate_dir = "data/tmp"
 output_dir = "data/output"
 
+[dataset]
+train_path = "E:\\musdb18hq\\train"
+test_path = "E:\\musdb18hq\\test"
+
+[training]
+batch_size = 2
+learning_rate = 0.0001
+epochs = 50
+segment_length_sec = 5.0
+save_interval = 1
+checkpoint_dir = "data/checkpoints"
+
 
 # =========================
 # Mixing
