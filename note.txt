@@ -1,0 +1,17 @@
+platform to upload and download
+
+
+classify not necessaryly naming them but can differentiate them
+s1 chords 
+s2 instruments
+both together
+
+human feedback loop
+bgm check
+ instruments 
+ chords
+
+ 
+flask backend 
+streamlit deploy
+dockerizaton 1 net
