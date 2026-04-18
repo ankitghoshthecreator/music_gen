@@ -3,6 +3,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import os
+import json
+import matplotlib.pyplot as plt
 
 from core.dataset import MUSDBDataset
 from core.transformer_model import MusicTransformer
@@ -81,6 +83,13 @@ def main():
     checkpoint_dir = train_cfg.get("checkpoint_dir", "data/checkpoints")
     os.makedirs(checkpoint_dir, exist_ok=True)
     
+    # 6. Initialize Training History
+    history = {
+        "train_loss": [],
+        "val_loss": []
+    }
+    history_path = os.path.join(os.path.dirname(checkpoint_dir), "training_history.json")
+    
     print(f"[Training] Starting for {epochs} epochs...")
     best_loss = float('inf')
 
@@ -142,6 +151,14 @@ def main():
         print(f"    Average Train Loss: {avg_train_loss:.4f}")
         print(f"    Average Val Loss:   {avg_val_loss:.4f}")
         
+        # Record history
+        history["train_loss"].append(avg_train_loss)
+        history["val_loss"].append(avg_val_loss)
+        
+        # Save history periodically
+        with open(history_path, "w") as f:
+            json.dump(history, f, indent=4)
+        
         # Checkpointing
         if (epoch + 1) % train_cfg.get("save_interval", 1) == 0:
             torch.save(model.state_dict(), os.path.join(checkpoint_dir, "recent_model.pth"))
@@ -152,6 +169,21 @@ def main():
                 print(f"[*] New best model saved (Val Loss: {avg_val_loss:.4f})")
 
     print(f"Training Complete! Checkpoints saved in {checkpoint_dir}")
+
+    # 7. Plotting Results
+    print(f"[Visualization] Generating loss graph...")
+    plt.figure(figsize=(10, 6))
+    plt.plot(range(1, len(history["train_loss"]) + 1), history["train_loss"], label="Train Loss", marker="o")
+    plt.plot(range(1, len(history["val_loss"]) + 1), history["val_loss"], label="Val Loss", marker="x")
+    plt.title("Training and Validation Loss over Epochs")
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.grid(True)
+    
+    plot_path = "test/loss_graph.png"
+    plt.savefig(plot_path)
+    print(f"[Visualization] Graph saved to {plot_path}")
 
 if __name__ == "__main__":
     main()
