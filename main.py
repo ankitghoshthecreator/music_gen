@@ -1,15 +1,17 @@
 import argparse
 from pathlib import Path
 from utils.config_loader import load_config
-from utils.audio_io import load_audio, save_audio
+from utils.audio_io import load_audio
+
 from core.preprocessor import AudioPreprocessor
-from core.bgm_model import BGMGenerator
-from core.mixer import TrackMixer
+from core.harmony_engine import HarmonyEngine
+from core.arrangement_engine import ArrangementEngine
 
 def main():
-    parser = argparse.ArgumentParser(description="BGM Generation Pipeline")
+    parser = argparse.ArgumentParser(description="Vocal2BGM: Heuristic MIDI Generation Pipeline")
     parser.add_argument("--input", type=str, required=True, help="Path to input vocal wav file")
-    parser.add_argument("--output", type=str, default="data/output/final_mix.wav", help="Path to output mixed wav file")
+    parser.add_argument("--output", type=str, default="data/output/background_music.mid", help="Path to output MIDI file")
+    parser.add_argument("--bpm", type=float, required=True, help="Target BPM of the vocal track")
     args = parser.parse_args()
 
     print(f"Loading configuration...")
@@ -18,23 +20,32 @@ def main():
     print(f"Loading input audio from {args.input}...")
     target_sr = config["audio"]["sample_rate"]
     y_raw, sr = load_audio(args.input, target_sr=target_sr, mono=config["audio"]["mono"])
+    
+    total_duration = len(y_raw) / sr
 
-    # 1. Preprocess Vocals
+    # 1. Preprocess Vocals & Extract Melody
     preprocessor = AudioPreprocessor(config)
-    y_vocal, vocal_features = preprocessor.process(y_raw, sr)
+    y_vocal, melody_notes = preprocessor.process(y_raw, sr, target_bpm=args.bpm)
 
-    # 2. Generate BGM from Features
-    bgm_gen = BGMGenerator(config)
-    y_bgm = bgm_gen.generate_bgm(vocal_features, target_length_samples=len(y_vocal), sr=sr)
+    if not melody_notes:
+        print("Warning: No melody detected in the audio file!")
 
-    # 3. Mix
-    mixer = TrackMixer(config)
-    y_mix = mixer.mix(y_vocal, y_bgm)
+    # 2. Harmonize (Generate Chords)
+    harmony_engine = HarmonyEngine(target_bpm=args.bpm)
+    chords = harmony_engine.generate_chords(melody_notes, total_duration)
 
-    # 4. Save
-    print(f"Saving final mix to {args.output}...")
-    save_audio(args.output, y_mix, sr=sr)
-    print("Pipeline completed successfully!")
+    # 3. Arrange Tracks (Map to MIDI)
+    arrangement_engine = ArrangementEngine(target_bpm=args.bpm)
+    midi_data = arrangement_engine.create_midi(melody_notes, chords)
+
+    # 4. Save MIDI
+    output_path = Path(args.output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    print(f"Saving generated MIDI to {output_path}...")
+    midi_data.write(str(output_path))
+    
+    print("Pipeline completed successfully! You can load the MIDI into any DAW.")
 
 if __name__ == "__main__":
     main()

@@ -76,77 +76,39 @@ Full instrumental .wav
 MIDI file .mid
 Individual stems
 Multiple genre versions
-Tech Stack
-Audio Processing
-Python
-librosa
-torchaudio
-numpy
-scipy
-MIDI Processing
-pretty_midi
-mido
-music21
-Machine Learning
-PyTorch
-scikit-learn
-transformers (optional)
-Rendering
-FluidSynth
-SoundFont (.sf2)
-DAW integration
-Proposed Architecture
-Stage 1: Vocal Understanding
-Input Vocal Audio
-↓
-Pitch Contour Extraction
-Tempo Detection
-Key Classification
-Emotion Embedding
-Stage 2: Music Logic Generation
-Vocal Features
-↓
-Chord Generator Model
-Bass Generator
-Drum Pattern Generator
-Arrangement Engine
-Stage 3: MIDI Composition
-Track 1 → Piano Chords
-Track 2 → Bass
-Track 3 → Drums
-Track 4 → Pads
-Track 5 → Melody Support
-Stage 4: Audio Rendering
-MIDI → Virtual Instruments → WAV Output
-Example Workflow
-User Uploads
-sad_vocal.wav
-Model Detects
-Tempo = 82 BPM
-Key = A Minor
-Mood = Emotional
-Generates MIDI
-| Am | F | C | G |
-Soft Piano
-Deep Bass
-Slow Drums
-Ambient Pad
-Final Output
-sad_vocal_bgm.wav
-sad_vocal.mid
-Machine Learning Tasks
-Classification Models
-Genre Classification
-Mood Detection
-Key Detection
-Sequence Models
-Vocal → Chord Progression
-Vocal Energy → Drum Density
-Melody → Bass Notes
-Optional Advanced Models
-Transformer arranger
-Diffusion audio renderer
-Reinforcement learning for user preference tuning
+## Tech Stack
+
+- **Audio Processing**: Python, `librosa`, `numpy`
+- **MIDI Processing**: `pretty_midi`
+
+## Proposed Architecture
+
+### Stage 1: Robust Input & Preprocessing
+- **Action**: The system extracts the melody pitch contour using `librosa.pyin`.
+- **Processing**: The pitch is discretized into MIDI notes on a grid defined by the provided target BPM.
+
+### Stage 2: Heuristic Harmonization
+- **Action**: Analyzes the melody notes inside each musical bar.
+- **Workflow**: Assigns a chord (major/minor) using a heuristic that sets the most frequent melody note in that bar as the chord's root.
+
+### Stage 3: Template-Based Arrangement Engine
+- **Action**: Maps the generated chords to MIDI tracks.
+- **Workflow**: 
+  - Generates a Pad track playing the chords.
+  - Generates a Bass track playing root notes.
+  - Drops a pre-composed standard 4/4 Drum loop.
+
+### Stage 4: MIDI Output
+- **Action**: Compiles all tracks (Melody, Pad, Bass, Drums) into a single `.mid` file.
+- **Usage**: The generated MIDI file can be dragged and dropped into any professional DAW (FL Studio, Ableton, Logic) to apply high-quality VST instruments.
+
+## Example Workflow
+
+1. User provides: `sad_vocal.wav` and Target BPM = `82`
+2. Pipeline extracts the melody as MIDI notes.
+3. System assigns chords per bar (e.g., Am -> F -> C -> G).
+4. System arranges Bass, Pads, and Drums.
+5. Final Output: `background_music.mid`
 Folder Structure
 Vocal2BGM/
 │── data/
@@ -155,12 +117,9 @@ Vocal2BGM/
 │── outputs/
 │── notebooks/
 │── src/
-│   │── preprocess.py
-│   │── pitch_detect.py
-│   │── bpm_detect.py
-│   │── chord_gen.py
-│   │── midi_builder.py
-│   │── render_audio.py
+│   │── preprocessor.py
+│   │── harmony_engine.py
+│   │── arrangement_engine.py
 │── app.py
 │── requirements.txt
 │── README.md
@@ -168,10 +127,13 @@ Installation
 git clone https://github.com/yourusername/Vocal2BGM.git
 cd Vocal2BGM
 pip install -r requirements.txt
-Run Project
-python app.py
+## Run Project
 
-Upload vocal file and receive generated instrumental music.
+```bash
+python main.py --input path/to/vocal.wav --bpm 120 --output data/output/bgm.mid
+```
+
+Upload a vocal file and specify its BPM to receive a generated instrumental MIDI.
 
 Future Enhancements
 Genre selector (LoFi / EDM / Cinematic / Trap)
