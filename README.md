@@ -169,6 +169,4 @@ Final Goal
 
 Create a system where anyone can sing an idea and instantly receive studio-style background music.
 
-License
-
-MIT License
+f
