@@ -14,7 +14,7 @@ class ArrangementEngine:
         
         for n in melody_notes:
             note = pretty_midi.Note(
-                velocity=100,
+                velocity=n.get('velocity', 100),
                 pitch=n['note'],
                 start=n['start'],
                 end=n['end']

@@ -29,10 +29,15 @@ def main():
 
     if not melody_notes:
         print("Warning: No melody detected in the audio file!")
+        detected_key = (0, 'major')
+    else:
+        detected_key = preprocessor.detect_key(melody_notes)
+        root_name = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][detected_key[0]]
+        print(f"Detected Key: {root_name} {detected_key[1]}")
 
     # 2. Harmonize (Generate Chords)
     harmony_engine = HarmonyEngine(target_bpm=args.bpm)
-    chords = harmony_engine.generate_chords(melody_notes, total_duration)
+    chords = harmony_engine.generate_chords(melody_notes, total_duration, detected_key=detected_key)
 
     # 3. Arrange Tracks (Map to MIDI)
     arrangement_engine = ArrangementEngine(target_bpm=args.bpm)

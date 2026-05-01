@@ -42,9 +42,16 @@ min_speech_duration_sec = 0.15
 # =========================
 
 [pitch]
+method = "basic-pitch" # options: "pyin", "basic-pitch"
 fmin_hz = 80.0
 fmax_hz = 400.0
 voicing_threshold = 0.3
+
+[basic_pitch]
+onset_threshold = 0.5
+frame_threshold = 0.3
+amplitude_threshold = 0.1
+minimum_note_length_ms = 100
 
 
 # =========================
