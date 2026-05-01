@@ -1,8 +1,9 @@
 import pretty_midi
 
 class ArrangementEngine:
-    def __init__(self, target_bpm):
+    def __init__(self, target_bpm, config=None):
         self.target_bpm = target_bpm
+        self.config = config or {}
         
     def create_midi(self, melody_notes, chords):
         print("Arranging MIDI tracks...")
@@ -52,7 +53,7 @@ class ArrangementEngine:
             root = chord['root']
             # Bass plays root note an octave down
             bass_note = root - 12
-            if bass_note < 0: bass_note += 12
+            while bass_note < 36: bass_note += 12 # Keep in reasonable bass range
             
             note = pretty_midi.Note(
                 velocity=100,
@@ -62,8 +63,52 @@ class ArrangementEngine:
             )
             bass_track.notes.append(note)
         midi_data.instruments.append(bass_track)
+
+        # 4. Violin Track (Sustained Pads)
+        violin_program = pretty_midi.instrument_name_to_program('Violin')
+        violin_track = pretty_midi.Instrument(program=violin_program, name="Violin Pads")
+        sustain_factor = self.config.get("arrangement", {}).get("sustain_factor", 1.2)
         
-        # 4. Drums (Simple 4-to-the-floor beat)
+        for chord in chords:
+            root = chord['root']
+            # Violin plays third and fifth an octave up for texture
+            intervals = [4, 7] if chord['type'] == 'major' else [3, 7]
+            for interval in intervals:
+                note = pretty_midi.Note(
+                    velocity=70,
+                    pitch=root + interval + 12,
+                    start=chord['start'],
+                    end=chord['start'] + (chord['end'] - chord['start']) * sustain_factor
+                )
+                violin_track.notes.append(note)
+        midi_data.instruments.append(violin_track)
+
+        # 5. Harmonium/Organ (Arpeggios)
+        organ_program = pretty_midi.instrument_name_to_program('Reed Organ')
+        organ_track = pretty_midi.Instrument(program=organ_program, name="Harmonium Arps")
+        
+        beat_duration = 60.0 / self.target_bpm
+        for chord in chords:
+            root = chord['root']
+            intervals = [0, 4, 7, 12] if chord['type'] == 'major' else [0, 3, 7, 12]
+            
+            # Simple arpeggio pattern over the chord duration
+            duration = chord['end'] - chord['start']
+            num_arps = int(duration / (beat_duration / 2)) # 8th notes
+            
+            for i in range(num_arps):
+                arp_time = chord['start'] + i * (beat_duration / 2)
+                pitch = root + intervals[i % len(intervals)]
+                note = pretty_midi.Note(
+                    velocity=60,
+                    pitch=pitch,
+                    start=arp_time,
+                    end=arp_time + (beat_duration / 2) * 0.9
+                )
+                organ_track.notes.append(note)
+        midi_data.instruments.append(organ_track)
+        
+        # 6. Drums (Simple 4-to-the-floor beat)
         drum_track = pretty_midi.Instrument(program=0, is_drum=True, name="Drums")
         beats_per_bar = 4
         bar_duration = (60.0 / self.target_bpm) * beats_per_bar

@@ -78,10 +78,15 @@ class AudioPreprocessor:
     def detect_key(self, notes):
         """
         Simple key detection based on pitch frequency distribution.
-        Returns the root note (0-11) and mode (major/minor).
+        Returns the root note (0-11), mode (major/minor), and confidence.
         """
+        pitch_config = self.config.get("pitch", {})
+        conf_threshold = pitch_config.get("key_confidence_threshold", 0.4)
+        fallback_root = pitch_config.get("fallback_key_root", 0)
+        fallback_mode = pitch_config.get("fallback_key_mode", "major")
+
         if not notes:
-            return 0, 'major' # Default to C major
+            return fallback_root, fallback_mode, 0.0
             
         chroma_counts = np.zeros(12)
         for n in notes:
@@ -89,15 +94,21 @@ class AudioPreprocessor:
             duration = n['end'] - n['start']
             chroma_counts[pitch % 12] += duration
             
-        # Krumhansl-Schmuckler profiles (simplified)
+        # Normalize chroma_counts
+        if np.sum(chroma_counts) > 0:
+            chroma_counts = chroma_counts / np.sum(chroma_counts)
+            
+        # Krumhansl-Schmuckler profiles (normalized)
         major_profile = np.array([6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88])
         minor_profile = np.array([6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17])
         
+        major_profile /= np.sum(major_profile)
+        minor_profile /= np.sum(minor_profile)
+        
         best_corr = -1.0
-        best_key = (0, 'major')
+        best_key = (fallback_root, fallback_mode)
         
         for i in range(12):
-            # Shift profiles
             sh_major = np.roll(major_profile, i)
             sh_minor = np.roll(minor_profile, i)
             
@@ -111,7 +122,11 @@ class AudioPreprocessor:
                 best_corr = corr_minor
                 best_key = (i, 'minor')
                 
-        return best_key
+        if best_corr < conf_threshold:
+            print(f"Low key detection confidence ({best_corr:.2f} < {conf_threshold}). Using fallback.")
+            return fallback_root, fallback_mode, best_corr
+            
+        return best_key[0], best_key[1], best_corr
 
     def _extract_with_pyin(self, y, sr):
         """Original librosa.pyin based extraction (legacy)."""

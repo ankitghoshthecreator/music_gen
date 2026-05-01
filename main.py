@@ -36,11 +36,11 @@ def main():
         print(f"Detected Key: {root_name} {detected_key[1]}")
 
     # 2. Harmonize (Generate Chords)
-    harmony_engine = HarmonyEngine(target_bpm=args.bpm)
+    harmony_engine = HarmonyEngine(target_bpm=args.bpm, config=config)
     chords = harmony_engine.generate_chords(melody_notes, total_duration, detected_key=detected_key)
 
     # 3. Arrange Tracks (Map to MIDI)
-    arrangement_engine = ArrangementEngine(target_bpm=args.bpm)
+    arrangement_engine = ArrangementEngine(target_bpm=args.bpm, config=config)
     midi_data = arrangement_engine.create_midi(melody_notes, chords)
 
     # 4. Save MIDI

@@ -1,14 +1,19 @@
 class HarmonyEngine:
-    def __init__(self, target_bpm):
+    def __init__(self, target_bpm, config=None):
         self.target_bpm = target_bpm
+        self.config = config or {}
         self.beats_per_bar = 4
-        self.bar_duration = (60.0 / target_bpm) * self.beats_per_bar
+        self.chord_change_beats = self.config.get("arrangement", {}).get("chord_change_interval_beats", 4)
+        self.bar_duration = (60.0 / target_bpm) * self.chord_change_beats
         
     def generate_chords(self, melody_notes, total_duration, detected_key=None):
         """
         Heuristic-based harmonizer that uses detected key for better consonance.
         """
-        key_root, key_mode = detected_key if detected_key else (0, 'major')
+        if detected_key and len(detected_key) == 3:
+            key_root, key_mode, key_conf = detected_key
+        else:
+            key_root, key_mode = detected_key if detected_key else (0, 'major')
         root_name = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][key_root]
         print(f"Generating chords for Key: {root_name} {key_mode}...")
 
