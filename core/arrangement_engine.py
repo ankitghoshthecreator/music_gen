@@ -13,12 +13,14 @@ class ArrangementEngine:
         melody_program = pretty_midi.instrument_name_to_program('Acoustic Grand Piano')
         melody_track = pretty_midi.Instrument(program=melody_program, name="Melody")
         
+        release_buffer = self.config.get("arrangement", {}).get("release_buffer_sec", 0.5)
+        
         for n in melody_notes:
             note = pretty_midi.Note(
                 velocity=n.get('velocity', 100),
                 pitch=n['note'],
                 start=n['start'],
-                end=n['end']
+                end=n['end'] + release_buffer
             )
             melody_track.notes.append(note)
         midi_data.instruments.append(melody_track)
@@ -40,7 +42,7 @@ class ArrangementEngine:
                     velocity=80,
                     pitch=root + interval,
                     start=chord['start'],
-                    end=chord['end']
+                    end=chord['end'] + release_buffer
                 )
                 pad_track.notes.append(note)
         midi_data.instruments.append(pad_track)
@@ -59,7 +61,7 @@ class ArrangementEngine:
                 velocity=100,
                 pitch=bass_note,
                 start=chord['start'],
-                end=chord['end']
+                end=chord['end'] + release_buffer
             )
             bass_track.notes.append(note)
         midi_data.instruments.append(bass_track)

@@ -80,15 +80,26 @@ checkpoint_dir = "data/checkpoints"
 
 
 # =========================
-# Mixing
+# Arrangement & Synthesis
 # =========================
-
-[mix]
-vocal_gain = 1.0
-bgm_gain = 0.6
-headroom_db = -1.0
 
 [arrangement]
 instruments = ["Acoustic Grand Piano", "Pad 1 (new age)", "Violin", "Electric Bass (finger)"]
 sustain_factor = 1.2 # Multiply note duration for sustained instruments
 chord_change_interval_beats = 4 # Change chord every 4 beats (1 bar in 4/4)
+release_buffer_sec = 0.5 # Add this to note ends to avoid abrupt cuts
+
+[synthesis]
+soundfont_path = ".venv/Lib/site-packages/pretty_midi/TimGM6mb.sf2"
+output_bgm_wav = "data/output/bgm_only.wav"
+output_final_wav = "data/output/final_prototype.wav"
+
+
+# =========================
+# Mixing
+# =========================
+
+[mix]
+vocal_gain_db = 0.0
+bgm_gain_db = -6.0
+headroom_db = -1.0
